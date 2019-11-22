@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MainController : MonoBehaviour
+public partial class MainController : MonoBehaviour
 {
     // UNKNOWN PROBLEM WITH GETTING MyMesh COMPONENT
     // INITIALIZING AND UPDATING MESH IN MyMesh FOR NOW
@@ -25,6 +25,10 @@ public class MainController : MonoBehaviour
 
         vertexPerRowSlider.TheSlider.onValueChanged.AddListener(resizeMesh);
         vertexPerColumnSlider.TheSlider.onValueChanged.AddListener(resizeMesh);
+
+        vertexHighlightColor = new Color(0.5f, 0f, 0.3f, 0.5f);
+        axisFrameHighlightColor = new Color(0.8f, 0.8f, 0.1f, 0.5f);
+        AxisFrame.SetActive(false);
     }
 
     // Update is called once per frame
@@ -32,6 +36,7 @@ public class MainController : MonoBehaviour
     {
         myMesh.UpdateMesh();
         myMeshNxM.UpdateMesh();
+        checkObjectSelection();  // Select any vertexObject that has been clicked
     }
 
     void resizeMesh(float v)
