@@ -2,28 +2,37 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public partial class MyMesh : MonoBehaviour 
+public partial class MyMeshNxM : MonoBehaviour 
 {
-    // n by n number of vertices - 2x2 mesh = 3x3 vertices
-	public void InitializeMesh(int Vn) 
+    // For passing value into ComputeNormals in UpdateMesh()
+    int rows;
+    int columns;
+    // n by m number of vertices - 3x2 mesh = 4x3 vertices
+    // Vn: number of vertices in a row
+    // Vm: number of vertices in a column
+	public void InitializeMesh(int Vn, int Vm) 
     {
         Mesh theMesh = GetComponent<MeshFilter>().mesh;   // get the mesh component
         theMesh.Clear();    // delete whatever is there!!
 
+        rows = Vn;  
+        columns = Vm;
 
-        Vector3[] v = new Vector3[Vn * Vn];   // n by n mesh needs (n + 1) by (n + 1) vertices
-        Vector3[] n = new Vector3[Vn * Vn];   // Vertex normals - Must be the same size as v
+        Vector3[] v = new Vector3[Vn * Vm];   // n by n mesh needs (n + 1) by (n + 1) vertices
+        Vector3[] n = new Vector3[Vn * Vm];   // Vertex normals - Must be the same size as v
 
         // Number of triangles: (n - 1) by (n - 1) mesh and 
         // 2 triangles on each mesh-unit and 3 indexes per triangle
-        int[] t = new int[(Vn - 1) * (Vn - 1) * 2 * 3];         
+        int[] t = new int[(Vn - 1) * (Vm - 1) * 2 * 3];         
 
         // Initialize the vertices with x and z from -1 to 1                                        v[12] v[13] v[14] v[15]
         // Note: Calculates from 0 to 2 for convenience, then subtracts 1 in inner for loop         v[8]  v[9]  v[10] v[11]
         // When looking at Unity x-z plane, Vertex0 is at the bottom left, (-1, 0, -1)              v[4]  v[5]  v[6]  v[7]
         // Vertices go from Left to Right, Bottom to Top                                            v[0]  v[1]  v[2]  v[3]
-        float interval = 2f / (Vn - 1);
-        for (int i = 0; i < Vn; i++)
+        float intervalN = 2f / (Vn - 1);
+        float intervalM = 2f / (Vm - 1);
+
+        for (int i = 0; i < Vm; i++)
         {
             for (int j = 0; j < Vn; j++)
             {
@@ -31,7 +40,7 @@ public partial class MyMesh : MonoBehaviour
                 //  j moves the vertex's column position, i.e. it moves it along the row
                 // Example: if Vn = 4 (4 vertices per row), i = 0 loop sets v[0], v[1], v[2], v[3],  i = 1 sets v[4], v[5], v[6], v[7], and so on
                 // (j * interval) - 1 spaces vertices evenly from -1 to 1 on the x axis, and same for (i * interval) - 1
-                v[(i * Vn) + j] = new Vector3((j * interval) - 1, 0, (i * interval) - 1);
+                v[(i * Vn) + j] = new Vector3((j * intervalN) - 1, 1, (i * intervalM) - 1);
             }
         }
 
@@ -130,8 +139,9 @@ public partial class MyMesh : MonoBehaviour
         theMesh.normals = n;
         */
 
-        // Uses MyMesh_Controllers partial class to create all the spheres to control the vertices
+        // Uses MyMesh_Controllers partial class to create all the spheres to control the vertices and their normals
         createVertexObjects(v);
+        InitNormals(v, n);
     }
 
     // Update is called once per frame
@@ -139,13 +149,18 @@ public partial class MyMesh : MonoBehaviour
     {
         Mesh theMesh = GetComponent<MeshFilter>().mesh;
         Vector3[] v = theMesh.vertices;
+        Vector3[] n = theMesh.normals;
+        int [] t = theMesh.triangles;
 
         for (int i = 0; i < vertexObjects.Length; i++)
         {
 		    v[i] = vertexObjects[i].transform.localPosition;
         }
 
+        ComputeNormals(v, n, t, rows, columns);
+
         theMesh.vertices = v;
+        theMesh.normals = n;
 	}
 
     // Clear the mesh and delete all vertex objects

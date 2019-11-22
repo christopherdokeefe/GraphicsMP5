@@ -9,26 +9,36 @@ public class MainController : MonoBehaviour
     public GameObject Quad;
     private MyMesh myMesh;
 
-    public SliderWithEcho vertexSlider;
+    public GameObject QuadNxM;
+    private MyMeshNxM myMeshNxM;
+
+    public SliderWithEcho vertexPerRowSlider;
+    public SliderWithEcho vertexPerColumnSlider;
     // Start is called before the first frame update
     void Start()
     {
-        
         myMesh = Quad.GetComponent<MyMesh>();
-        myMesh.InitializeMesh((int) vertexSlider.GetSliderValue());
-        vertexSlider.TheSlider.onValueChanged.AddListener(resizeMesh);
-        
+        myMesh.InitializeMesh((int) vertexPerRowSlider.GetSliderValue());
+
+        myMeshNxM = QuadNxM.GetComponent<MyMeshNxM>();
+        myMeshNxM.InitializeMesh((int) vertexPerRowSlider.GetSliderValue(), (int) vertexPerColumnSlider.GetSliderValue());
+
+        vertexPerRowSlider.TheSlider.onValueChanged.AddListener(resizeMesh);
+        vertexPerColumnSlider.TheSlider.onValueChanged.AddListener(resizeMesh);
     }
 
     // Update is called once per frame
     void Update()
     {
         myMesh.UpdateMesh();
+        myMeshNxM.UpdateMesh();
     }
 
     void resizeMesh(float v)
     {
-        int vertices = (int) v; // Change value to an int for InitializeMesh to use
-        myMesh.InitializeMesh(vertices);
+        int vertexRows = (int) vertexPerRowSlider.GetSliderValue();  // Change value to an int for InitializeMesh to use
+        int vertexColumns = (int) vertexPerColumnSlider.GetSliderValue();
+        myMesh.InitializeMesh(vertexRows);
+        myMeshNxM.InitializeMesh(vertexRows, vertexColumns);
     }
 }
