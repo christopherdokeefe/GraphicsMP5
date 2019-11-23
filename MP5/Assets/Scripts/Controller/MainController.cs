@@ -37,6 +37,7 @@ public partial class MainController : MonoBehaviour
         myMesh.UpdateMesh();
         myMeshNxM.UpdateMesh();
         checkObjectSelection();  // Select any vertexObject that has been clicked
+        checkVertexDisplay();
     }
 
     void resizeMesh(float v)

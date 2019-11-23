@@ -21,6 +21,8 @@ public partial class MainController : MonoBehaviour
     Vector3 delta = Vector3.zero;
     Vector3 mouseDownPos = Vector3.zero;
 
+    bool verticesDisplayed = false;
+
     // Checks if a vertex has been selected or an axis is being dragged
     // And allows the user to manipulate the vertex position by dragging the axis
     void checkObjectSelection()
@@ -128,5 +130,26 @@ public partial class MainController : MonoBehaviour
         selectedObject.transform.position = new Vector3(selectedObject.transform.position.x, 
                                                 selectedObject.transform.position.y, selectedObject.transform.position.z  - (delta.x / 50));
         AxisFrame.transform.position = selectedObject.transform.position;
+    }
+
+    void checkVertexDisplay()
+    {
+        if (Input.GetKey(KeyCode.LeftControl) && verticesDisplayed == false)
+        {
+            for (int i = 0; i < QuadNxM.transform.childCount; i++)
+            {
+                QuadNxM.transform.GetChild(i).gameObject.SetActive(true);
+            }
+            verticesDisplayed = true;
+        }
+        if (!Input.GetKey(KeyCode.LeftControl) && selectedObject == null)
+        {
+            for (int i = 0; i < QuadNxM.transform.childCount; i++)
+            {
+                QuadNxM.transform.GetChild(i).gameObject.SetActive(false);
+            }
+            verticesDisplayed = false;
+            AxisFrame.SetActive(false);
+        }
     }
 }
