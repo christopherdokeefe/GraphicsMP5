@@ -4,18 +4,21 @@ using UnityEngine;
 
 public partial class MyMeshCylinder : MonoBehaviour
 {
-    int rows;
     int columns;
+    int rows;
+    float height = 2f;
+    float radius = 1f;
+    float thetaInterval;
 
-    // Vn: number of verticies on y-axis
-    // Vm: number of verticies around circumfrance
-    public void InitializeMesh(int Vn, int Vm)
+    // Vn: number of verticies around circumfrance
+    // Vm: number of verticies on y-axis
+    public void InitializeMesh(int Vn, int Vm, float theta)
     {
         Mesh theMesh = GetComponent<MeshFilter>().mesh;   // get the mesh component
         theMesh.Clear();    // delete whatever is there!!
 
-        rows = Vn;
-        columns = Vm;
+        columns = Vn;
+        rows = Vm;
 
         Vector3[] v = new Vector3[Vn * Vm];   // n by n mesh needs (n + 1) by (n + 1) vertices
         Vector3[] n = new Vector3[Vn * Vm];   // Vertex normals - Must be the same size as v
@@ -28,8 +31,10 @@ public partial class MyMeshCylinder : MonoBehaviour
         // Note: Calculates from 0 to 2 for convenience, then subtracts 1 in inner for loop         v[8]  v[9]  v[10] v[11]
         // When looking at Unity x-z plane, Vertex0 is at the bottom left, (-1, 0, -1)              v[4]  v[5]  v[6]  v[7]
         // Vertices go from Left to Right, Bottom to Top                                            v[0]  v[1]  v[2]  v[3]
-        float intervalN = 2f / (Vn - 1);
-        float intervalM = 2f / (Vm - 1);
+        float intervalM = 2f / (Vm - 1);  // Distance between rows
+        thetaInterval = theta / (Vn - 1);  // Angle between columns
+
+        float r = radius;      // radius of the cylinder
 
         for (int i = 0; i < Vm; i++)
         {
@@ -39,8 +44,13 @@ public partial class MyMeshCylinder : MonoBehaviour
                 //
                 // (r * cos(theta), j * height, (r * sin(theta))
                 // radius = r
-                // theta = the value of is a angle between 10 and 360 degrees divided by the Vm (rows)
-                v[(i * Vn) + j] = new Vector3((j * intervalN) - 1, 1, (i * intervalM) - 1);
+                // theta = the value is an angle between 10 and 360 degrees divided by the Vm (rows)
+
+                // v[(i * Vn) + j] = new Vector3((j * intervalN) - 1, 0, (i * intervalM) - 1) * scale;
+
+                v[(i * Vn) + j] = new Vector3(radius * Mathf.Cos(thetaInterval * j * Mathf.Deg2Rad), ((i * intervalM) - 1) * height, 
+                                              radius * Mathf.Sin(thetaInterval * j * Mathf.Deg2Rad));
+                //r * Mathf.Cos(thetaInterval * i), 0, r * Mathf.Sin(thetaInterval * i)
             }
         }
 
@@ -87,7 +97,7 @@ public partial class MyMeshCylinder : MonoBehaviour
         theMesh.normals = n;
 
         // Uses MyMesh_Controllers partial class to create all the spheres to control the vertices and their normals
-        createVertexObjects(v);
+        createVertexObjects(v, Vn, Vm);
         InitNormals(v, n);
     }
 
@@ -99,17 +109,56 @@ public partial class MyMeshCylinder : MonoBehaviour
         Vector3[] n = theMesh.normals;
         int[] t = theMesh.triangles;
 
+        int Vn = columns;
+        int Vm = rows;
+
         if (vertexObjects != null)
         {
-            for (int i = 0; i < vertexObjects.Length; i++)
+            for (int i = 0; i < Vm; i++)
             {
-                v[i] = vertexObjects[i].transform.localPosition;
-            }
+                v[i * Vn] = vertexObjects[i * Vn].transform.localPosition;  // Set vertex position to vertexObject's position
+                float r = Mathf.Sqrt((v[i * Vn].x * v[i * Vn].x) + (v[i * Vn].z * v[i * Vn].z)); // Calculate new radius
 
+                for (int j = 1; j < Vn; j++)
+                {
+                    // Calculate the position of each vertexObject in the same row so they all move outwards and inwards together
+                    vertexObjects[(i * Vn) + j].transform.localPosition = new Vector3(r * Mathf.Cos(thetaInterval * j * Mathf.Deg2Rad),
+                                     vertexObjects[i * Vn].transform.localPosition.y, r * Mathf.Sin(thetaInterval * j * Mathf.Deg2Rad));
+
+                    v[i * Vn + j] = vertexObjects[i * Vn + j].transform.localPosition;  // Set vertex position to newly positioned vertex object
+                }
+            }
             ComputeNormals(v, n, t, rows, columns);
 
             theMesh.vertices = v;
             theMesh.normals = n;
+        }
+    }
+
+    public void UpdateRotation(float theta, int Vn, int Vm)
+    {
+        Mesh theMesh = GetComponent<MeshFilter>().mesh;
+        Vector3[] v = theMesh.vertices;
+        float[] currentRadiuses = new float[Vm];  // Distance from center of each movable vertex
+        
+        thetaInterval = theta / (Vn - 1);  // Angle between columns
+        for (int i = 0; i < Vm; i++)
+        {
+            currentRadiuses[i] = Mathf.Sqrt((v[i * Vn].x * v[i * Vn].x) + (v[i * Vn].z * v[i * Vn].z)); // Calculate current radiuses
+            for (int j = 1; j < Vn; j++)
+            {
+                // Following line to change to something like: 
+                //
+                // (r * cos(theta), j * height, (r * sin(theta))
+                // radius = r
+                // theta = the value is an angle between 10 and 360 degrees divided by the Vm (rows)
+
+                // v[(i * Vn) + j] = new Vector3((j * intervalN) - 1, 0, (i * intervalM) - 1) * scale;
+
+                v[(i * Vn) + j] = new Vector3(currentRadiuses[i] * Mathf.Cos(thetaInterval * j * Mathf.Deg2Rad), v[(i * Vn) + j].y, 
+                                              currentRadiuses[i] * Mathf.Sin(thetaInterval * j * Mathf.Deg2Rad));
+                //r * Mathf.Cos(thetaInterval * i), 0, r * Mathf.Sin(thetaInterval * i)
+            }
         }
     }
 

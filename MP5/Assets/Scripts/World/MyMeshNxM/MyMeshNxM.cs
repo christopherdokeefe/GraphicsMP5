@@ -18,6 +18,8 @@ public partial class MyMeshNxM : MonoBehaviour
         rows = Vn;  
         columns = Vm;
 
+        int scale = 2;
+
         Vector3[] v = new Vector3[Vn * Vm];   // n by n mesh needs (n + 1) by (n + 1) vertices
         Vector3[] n = new Vector3[Vn * Vm];   // Vertex normals - Must be the same size as v
         Vector2[] uv = new Vector2[Vn * Vm];  // uv controls texture transform on mesh
@@ -41,7 +43,7 @@ public partial class MyMeshNxM : MonoBehaviour
                 //  j moves the vertex's column position, i.e. it moves it along the row
                 // Example: if Vn = 4 (4 vertices per row), i = 0 loop sets v[0], v[1], v[2], v[3],  i = 1 sets v[4], v[5], v[6], v[7], and so on
                 // (j * interval) - 1 spaces vertices evenly from -1 to 1 on the x axis, and same for (i * interval) - 1
-                v[(i * Vn) + j] = new Vector3((j * intervalN) - 1, 1, (i * intervalM) - 1);
+                v[(i * Vn) + j] = new Vector3((j * intervalN) - 1, 0, (i * intervalM) - 1) * scale;
             }
         }
 

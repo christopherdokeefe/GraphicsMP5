@@ -16,6 +16,7 @@ public partial class MainController : MonoBehaviour
 
     public SliderWithEcho cylinderVertexPerRowSlider;
     public SliderWithEcho cylinderVertexPerColumnSlider;
+    public SliderWithEcho cylinderRotationSlider;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,7 +24,9 @@ public partial class MainController : MonoBehaviour
         myMeshNxM.InitializeMesh((int) quadVertexPerRowSlider.GetSliderValue(), (int) quadVertexPerColumnSlider.GetSliderValue());
 
         myMeshCylinder = Cylinder.GetComponent<MyMeshCylinder>();
-        myMeshCylinder.InitializeMesh((int)cylinderVertexPerRowSlider.GetSliderValue(), (int)cylinderVertexPerColumnSlider.GetSliderValue());
+        myMeshCylinder.InitializeMesh((int)cylinderVertexPerRowSlider.GetSliderValue(), 
+                                      (int)cylinderVertexPerColumnSlider.GetSliderValue(),
+                                      cylinderRotationSlider.GetSliderValue());
 
 
         quadVertexPerRowSlider.TheSlider.onValueChanged.AddListener(resizeQuadMesh);
@@ -31,6 +34,7 @@ public partial class MainController : MonoBehaviour
 
         cylinderVertexPerRowSlider.TheSlider.onValueChanged.AddListener(resizeCylinderMesh);
         cylinderVertexPerColumnSlider.TheSlider.onValueChanged.AddListener(resizeCylinderMesh);
+        cylinderRotationSlider.TheSlider.onValueChanged.AddListener(updateCylinderRotation);
 
         vertexHighlightColor = new Color(0.5f, 0f, 0.3f, 0.5f);
         axisFrameHighlightColor = new Color(0.8f, 0.8f, 0.1f, 0.5f);
@@ -44,20 +48,30 @@ public partial class MainController : MonoBehaviour
         myMeshCylinder.UpdateMesh();
 
         checkObjectSelection();  // Select any vertexObject that has been clicked
-        checkVertexDisplay();
+        checkVertexDisplay(QuadNxM);
+        checkVertexDisplay(Cylinder);
     }
 
     void resizeQuadMesh(float v)
     {
-        int vertexRows = (int) quadVertexPerRowSlider.GetSliderValue();  // Change value to an int for InitializeMesh to use
-        int vertexColumns = (int) quadVertexPerColumnSlider.GetSliderValue();
-        myMeshNxM.InitializeMesh(vertexRows, vertexColumns);
+        int vertexRows = (int)quadVertexPerRowSlider.GetSliderValue();  // Change value to an int for InitializeMesh to use
+        int vertexColumns = (int)quadVertexPerColumnSlider.GetSliderValue();
+        myMeshNxM.InitializeMesh(vertexColumns, vertexRows);
     }
 
     void resizeCylinderMesh(float v)
     {
         int vertexRows = (int)cylinderVertexPerRowSlider.GetSliderValue();  // Change value to an int for InitializeMesh to use
         int vertexColumns = (int)cylinderVertexPerColumnSlider.GetSliderValue();
-        myMeshCylinder.InitializeMesh(vertexRows, vertexColumns);
+        float theta = cylinderRotationSlider.GetSliderValue();
+        myMeshCylinder.InitializeMesh(vertexColumns, vertexRows, theta);
+    }
+
+    void updateCylinderRotation(float v)
+    {
+        int vertexRows = (int)cylinderVertexPerRowSlider.GetSliderValue();  // Change value to an int for InitializeMesh to use
+        int vertexColumns = (int)cylinderVertexPerColumnSlider.GetSliderValue();
+        float theta = cylinderRotationSlider.GetSliderValue();
+        myMeshCylinder.UpdateRotation(theta, vertexColumns, vertexRows);
     }
 }

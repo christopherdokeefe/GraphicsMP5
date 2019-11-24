@@ -29,7 +29,7 @@ public partial class MyMeshNxM : MonoBehaviour {
             GameObject o = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             o.name = "Normal" + i.ToString();
             normals[i] = o.AddComponent<LineSegment>();
-            normals[i].SetWidth(0.05f);
+            normals[i].SetWidth(0.02f);
             normals[i].transform.SetParent(this.transform);
         }
         UpdateNormals(v, n);

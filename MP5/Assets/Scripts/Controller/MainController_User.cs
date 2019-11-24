@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 public partial class MainController : MonoBehaviour
 {
     public GameObject AxisFrame;
-    GameObject selectedObject;
+    public GameObject selectedObject;
     GameObject selectedAxis;
 
     RaycastHit hit;
@@ -20,8 +20,6 @@ public partial class MainController : MonoBehaviour
 
     Vector3 delta = Vector3.zero;
     Vector3 mouseDownPos = Vector3.zero;
-
-    bool verticesDisplayed = false;
 
     // Checks if a vertex has been selected or an axis is being dragged
     // And allows the user to manipulate the vertex position by dragging the axis
@@ -44,9 +42,7 @@ public partial class MainController : MonoBehaviour
             // If neither vertex nor axis frame is hit with raycast, deselect vertex and hide the Axis Frame
             else if (selectedObject != null)  
             {
-                selectedObject.GetComponent<Renderer>().material.color = storedVertexColor;
-                selectedObject = null;
-                AxisFrame.SetActive(false);
+                DeselectVertex();
             }
         }
         // If user is holding the mouse button and an axis is selected, allow them to move it
@@ -132,23 +128,31 @@ public partial class MainController : MonoBehaviour
         AxisFrame.transform.position = selectedObject.transform.position;
     }
 
-    void checkVertexDisplay()
+    void checkVertexDisplay(GameObject mesh)
     {
-        if (Input.GetKey(KeyCode.LeftControl) && verticesDisplayed == false)
+        if (Input.GetKey(KeyCode.LeftControl) && mesh.transform.GetChild(0).gameObject.activeSelf == false)
         {
-            for (int i = 0; i < QuadNxM.transform.childCount; i++)
+            for (int i = 0; i < mesh.transform.childCount; i++)
             {
-                QuadNxM.transform.GetChild(i).gameObject.SetActive(true);
+                mesh.transform.GetChild(i).gameObject.SetActive(true);
             }
-            verticesDisplayed = true;
         }
         if (!Input.GetKey(KeyCode.LeftControl) && selectedObject == null)
         {
-            for (int i = 0; i < QuadNxM.transform.childCount; i++)
+            for (int i = 0; i < mesh.transform.childCount; i++)
             {
-                QuadNxM.transform.GetChild(i).gameObject.SetActive(false);
+                mesh.transform.GetChild(i).gameObject.SetActive(false);
             }
-            verticesDisplayed = false;
+            AxisFrame.SetActive(false);
+        }
+    }
+
+    public void DeselectVertex()
+    {
+        if (selectedObject != null)
+        {
+            selectedObject.GetComponent<Renderer>().material.color = storedVertexColor;
+            selectedObject = null;
             AxisFrame.SetActive(false);
         }
     }
