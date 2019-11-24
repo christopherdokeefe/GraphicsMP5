@@ -20,6 +20,7 @@ public partial class MyMeshNxM : MonoBehaviour
 
         Vector3[] v = new Vector3[Vn * Vm];   // n by n mesh needs (n + 1) by (n + 1) vertices
         Vector3[] n = new Vector3[Vn * Vm];   // Vertex normals - Must be the same size as v
+        Vector2[] uv = new Vector2[Vn * Vm];
 
         // Number of triangles: (n - 1) by (n - 1) mesh and 
         // 2 triangles on each mesh-unit and 3 indexes per triangle
@@ -82,66 +83,28 @@ public partial class MyMeshNxM : MonoBehaviour
             }
         }
 
-        theMesh.vertices = v; //  new Vector3[3];
-        theMesh.triangles = t; //  new int[3];
-        theMesh.normals = n;
+        // handles uv 
+        float uvIntervalN = 1f / (Vn - 1);
+        float uvIntervalM = 1f / (Vm - 1);
 
-        /* KELVIN SUNG EXAMPLE ONLY FOR REFERENCE, CAN DELETE
-        Mesh theMesh = GetComponent<MeshFilter>().mesh;   // get the mesh component
-        theMesh.Clear();    // delete whatever is there!!
-
-        Vector3[] v = new Vector3[9];   // 2x2 mesh needs 3x3 vertices
-        int[] t = new int[8*3];         // Number of triangles: 2x2 mesh and 2x triangles on each mesh-unit
-        Vector3[] n = new Vector3[9];   // MUST be the same as number of vertices
-
-        v[0] = new Vector3(-1, 0, -1);
-        v[1] = new Vector3( 0, 0, -1);
-        v[2] = new Vector3( 1, 0, -1);
-
-        v[3] = new Vector3(-1, 0, 0);
-        v[4] = new Vector3( 0, 0, 0);
-        v[5] = new Vector3( 1, 0, 0);
-
-        v[6] = new Vector3(-1, 0, 1);
-        v[7] = new Vector3( 0, 0, 1);
-        v[8] = new Vector3( 1, 0, 1);
-
-        n[0] = new Vector3(0, 1, 0);
-        n[1] = new Vector3(0, 1, 0);
-        n[2] = new Vector3(0, 1, 0);
-        n[3] = new Vector3(0, 1, 0);
-        n[4] = new Vector3(0, 1, 0);
-        n[5] = new Vector3(0, 1, 0);
-        n[6] = new Vector3(0, 1, 0);
-        n[7] = new Vector3(0, 1, 0);
-        n[8] = new Vector3(0, 1, 0);
-
-        t[0] = 0; t[1] = 3; t[2] = 4;  // 0th triangle
-        t[3] = 0; t[4] = 4; t[5] = 1;  // 1st triangle
-
-
-        t[6] = 1; t[7] = 4; t[8] = 5;  // 2nd triangle
-        t[9] = 1; t[10] = 5; t[11] = 2;  // 3rd triangle
-
-
-
-
-
-        t[12] = 3; t[13] = 6; t[14] = 7;  // 4th triangle
-        t[15] = 3; t[16] = 7; t[17] = 4;  // 5th triangle
-
-
-        t[18] = 4; t[19] = 7; t[20] = 8;  // 6th triangle
-        t[21] = 4; t[22] = 8; t[23] = 5;  // 7th triangle
+        // Translate all the vertices to UV values between 0 and 1 (U, V)
+        for (int i = 0; i < Vm; i++)
+        {
+            for (int j = 0; j < Vn; j++)
+            {
+                uv[(i * Vn) + j] = new Vector2(j * uvIntervalN, i * uvIntervalM);
+            }
+        }
 
         theMesh.vertices = v; //  new Vector3[3];
         theMesh.triangles = t; //  new int[3];
         theMesh.normals = n;
-        */
+        theMesh.uv = uv;
 
         // Uses MyMesh_Controllers partial class to create all the spheres to control the vertices and their normals
         createVertexObjects(v);
         InitNormals(v, n);
+       // theMesh.uv = uv;
     }
 
     // Update is called once per frame
@@ -154,7 +117,7 @@ public partial class MyMeshNxM : MonoBehaviour
 
         for (int i = 0; i < vertexObjects.Length; i++)
         {
-		    v[i] = vertexObjects[i].transform.localPosition;
+            v[i] = vertexObjects[i].transform.localPosition;
         }
 
         ComputeNormals(v, n, t, rows, columns);

@@ -6,9 +6,6 @@ public partial class MainController : MonoBehaviour
 {
     // UNKNOWN PROBLEM WITH GETTING MyMesh COMPONENT
     // INITIALIZING AND UPDATING MESH IN MyMesh FOR NOW
-    public GameObject Quad;
-    private MyMesh myMesh;
-
     public GameObject QuadNxM;
     private MyMeshNxM myMeshNxM;
 
@@ -17,9 +14,6 @@ public partial class MainController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        myMesh = Quad.GetComponent<MyMesh>();
-        myMesh.InitializeMesh((int) vertexPerRowSlider.GetSliderValue());
-
         myMeshNxM = QuadNxM.GetComponent<MyMeshNxM>();
         myMeshNxM.InitializeMesh((int) vertexPerRowSlider.GetSliderValue(), (int) vertexPerColumnSlider.GetSliderValue());
 
@@ -34,7 +28,6 @@ public partial class MainController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        myMesh.UpdateMesh();
         myMeshNxM.UpdateMesh();
         checkObjectSelection();  // Select any vertexObject that has been clicked
         checkVertexDisplay();
@@ -44,7 +37,6 @@ public partial class MainController : MonoBehaviour
     {
         int vertexRows = (int) vertexPerRowSlider.GetSliderValue();  // Change value to an int for InitializeMesh to use
         int vertexColumns = (int) vertexPerColumnSlider.GetSliderValue();
-        myMesh.InitializeMesh(vertexRows);
         myMeshNxM.InitializeMesh(vertexRows, vertexColumns);
     }
 }
