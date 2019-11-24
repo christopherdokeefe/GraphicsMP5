@@ -4,6 +4,8 @@ using UnityEngine;
 
 public partial class MyMeshNxM : MonoBehaviour 
 {
+    // to send uv 
+    private XfromControl xform;
     // For passing value into ComputeNormals in UpdateMesh()
     int rows;
     int columns;
@@ -100,11 +102,11 @@ public partial class MyMeshNxM : MonoBehaviour
         theMesh.triangles = t; //  new int[3];
         theMesh.normals = n;
         theMesh.uv = uv;
+        //xform.UVReset();
 
         // Uses MyMesh_Controllers partial class to create all the spheres to control the vertices and their normals
         createVertexObjects(v);
         InitNormals(v, n);
-       // theMesh.uv = uv;
     }
 
     // Update is called once per frame
